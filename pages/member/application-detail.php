@@ -14,7 +14,6 @@ require_once '../../config/database.php';
 $db = new Database();
 $conn = $db->getConnection();
 
-// Vulnerable: No ownership check
 $query = "SELECT ja.*, j.title, j.description, j.location, j.job_type, j.salary_min, j.salary_max,
                  c.company_name, c.description as company_description
          FROM job_applications ja
@@ -89,13 +88,11 @@ if (!$application) {
                                 </div>
                                 
                                 <h4>Your Cover Letter</h4>
-                                <!-- Vulnerable: XSS -->
                                 <div class="border p-3 rounded bg-light mb-4">
                                     <?php echo nl2br($application['cover_letter']); ?>
                                 </div>
                                 
                                 <h4>Job Description</h4>
-                                <!-- Vulnerable: XSS -->
                                 <div class="mb-4"><?php echo $application['description']; ?></div>
                             </div>
                             

@@ -58,7 +58,7 @@ require_once __DIR__ . '/../includes/auth.php';
     </div>
 </nav>
 
-<!-- Vulnerable search functionality -->
+
 <div class="container mt-3">
     <div class="row">
         <div class="col-md-8 mx-auto">

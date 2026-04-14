@@ -8,11 +8,11 @@ require_once '../config/database.php';
 $db = new Database();
 $conn = $db->getConnection();
 
-// Vulnerable search
+
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $location = isset($_GET['location']) ? $_GET['location'] : '';
 
-// Vulnerable: SQL injection
+
 $query = "SELECT j.*, c.company_name FROM jobs j 
          JOIN company_profiles c ON j.company_id = c.user_id 
          WHERE j.status = 'active'";
@@ -33,7 +33,7 @@ $jobs = $conn->query($query);
 <div class="container mt-4">
     <h2>Available Jobs</h2>
     
-    <!-- Vulnerable search form -->
+    
     <div class="card mb-4">
         <div class="card-body">
             <form method="GET" class="row g-3">
@@ -52,7 +52,7 @@ $jobs = $conn->query($query);
         </div>
     </div>
     
-    <!-- Vulnerable: XSS in search results -->
+    
     <?php if ($search || $location): ?>
         <div class="alert alert-info">
             Search results for: <strong><?php echo $search; ?></strong>

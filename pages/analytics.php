@@ -1,4 +1,5 @@
 <?php
+require_once '../includes/session.php';
 require_once '../config/env.php';
 require_once '../templates/header.php';
 require_once '../templates/nav.php';

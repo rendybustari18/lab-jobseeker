@@ -14,20 +14,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
     
-    // Vulnerable: No password validation
+    
     if ($password !== $confirm_password) {
         $error = 'Passwords do not match.';
     } else {
         $db = new Database();
         $conn = $db->getConnection();
         
-        // Vulnerable: SQL injection
+        
         $query = "SELECT * FROM users WHERE verification_token = '$token'";
         $result = $conn->query($query);
         $user = $result->fetch(PDO::FETCH_ASSOC);
         
         if ($user) {
-            // Vulnerable: Store password in plain text
+            
             $update_query = "UPDATE users SET password = '$password', verification_token = NULL WHERE id = " . $user['id'];
             if ($conn->query($update_query)) {
                 $message = 'Password reset successfully! You can now login.';

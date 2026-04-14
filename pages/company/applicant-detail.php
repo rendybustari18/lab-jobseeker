@@ -8,7 +8,6 @@ require_once '../../templates/nav.php';
 $auth = new Auth();
 $auth->checkAccess('company');
 
-$application_id = $_GET['id'] ?? 0; // Vulnerable to SQL injection
 
 require_once '../../config/database.php';
 $db = new Database();
@@ -16,7 +15,6 @@ $conn = $db->getConnection();
 
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
 
-// Vulnerable: No proper authorization check
 $query = "SELECT ja.*, j.title as job_title, j.description as job_description,
                  u.username, u.email, mp.full_name, mp.phone, mp.address, mp.profile_photo, mp.cv_file
          FROM job_applications ja
@@ -107,7 +105,6 @@ $education = $conn->query($education_query);
                                 </div>
                                 
                                 <h5>Cover Letter</h5>
-                                <!-- Vulnerable: XSS -->
                                 <div class="border p-3 rounded bg-light mb-4">
                                     <?php echo nl2br($application['cover_letter']); ?>
                                 </div>

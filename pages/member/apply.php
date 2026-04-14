@@ -8,7 +8,6 @@ require_once '../../templates/nav.php';
 $auth = new Auth();
 $auth->checkAccess('member');
 
-$job_id = $_GET['job_id'] ?? 0; // Vulnerable to SQL injection
 $message = '';
 $error = '';
 
@@ -29,7 +28,6 @@ if (!$job) {
 }
 
 // Check if already applied
-$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0; // Vulnerable to SQL injection
 $check_query = "SELECT * FROM job_applications WHERE job_id = $job_id AND user_id = $user_id";
 $check_result = $conn->query($check_query);
 
@@ -45,10 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $cover_letter = $_POST['cover_letter'];
 
-        // Use addslashes to prevent SQL crash but still vulnerable to XSS
+        
         $cover_letter_escaped = addslashes($cover_letter);
 
-        // Vulnerable: SQL injection (still possible with addslashes bypass)
         $query = "INSERT INTO job_applications (job_id, user_id, cover_letter)
                  VALUES ($job_id, $user_id, '$cover_letter_escaped')";
 

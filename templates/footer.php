@@ -14,7 +14,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Vulnerable JavaScript -->
+
     <script>
         // Expose sensitive functions globally
         function makeRequest(url, data) {
@@ -28,12 +28,12 @@
             });
         }
         
-        // XSS vulnerability
+        
         function displayMessage(message) {
             document.getElementById('message').innerHTML = message;
         }
         
-        // Insecure local storage usage
+        
         function saveToken(token) {
             localStorage.setItem('jwt_token', token);
         }

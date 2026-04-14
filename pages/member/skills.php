@@ -25,11 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $db = new Database();
     $conn = $db->getConnection();
 
-    // Use addslashes to prevent SQL crash but still vulnerable to XSS
+    
     $skill_name_escaped = addslashes($skill_name);
     $level_escaped = addslashes($level);
 
-    // Vulnerable: SQL injection (still possible with addslashes bypass)
     $query = "INSERT INTO skills (user_id, skill_name, level) VALUES ($user_id, '$skill_name_escaped', '$level_escaped')";
 
     if ($conn->query($query)) {
@@ -135,7 +134,6 @@ $skills = $conn->query($query);
                                                 <br>
                                                 <small class="text-muted"><?php echo ucfirst($skill['level']); ?></small>
                                             </div>
-                                            <!-- Vulnerable: Direct object reference -->
                                             <a href="?delete_skill=<?php echo $skill['id']; ?>" class="btn btn-sm btn-danger" 
                                                onclick="return confirm('Delete skill?')">Delete</a>
                                         </div>
@@ -153,14 +151,12 @@ $skills = $conn->query($query);
 </div>
 
 <?php
-// Vulnerable: Delete skill without proper authorization
 if (isset($_GET['delete_skill'])) {
-    $skill_id = addslashes($_GET['delete_skill']); // Prevent SQL crash but still vulnerable
+    $skill_id = addslashes($_GET['delete_skill']); 
     require_once '../../config/database.php';
     $db = new Database();
     $conn = $db->getConnection();
 
-    // Vulnerable: No ownership check, still possible SQL injection
     $query = "DELETE FROM skills WHERE id = '$skill_id'";
     $conn->query($query);
 

@@ -14,27 +14,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $confirm_password = $_POST['confirm_password'];
     $role = $_POST['role'];
     
-    // Vulnerable: No input validation
-    // Vulnerable: No password confirmation check
-    // Vulnerable: No password complexity requirements
+    
     
     $auth = new Auth();
     
-    // Store password in plain text - major vulnerability
-    if ($auth->register($username, $email, $password, $role)) {
-        // Send verification email after successful registration
-        require_once '../../includes/email.php';
-        $emailService = new EmailService();
-        $verification_token = bin2hex(random_bytes(32));
-
-        // Send registration email
-        $emailSent = $emailService->sendRegistrationEmail($email, $username, $verification_token);
-
-        if ($emailSent) {
-            $message = 'Registration successful! Please check your email to verify your account.';
-        } else {
-            $message = 'Registration successful! However, there was an issue sending the verification email. Please contact support.';
-        }
+    $token = $auth->register($username, $email, $password, $role);
+    if ($token) {
+        header('Location: registration-success.php?token=' . $token);
+        exit;
     } else {
         $error = 'Registration failed. Please try again.';
     }
@@ -103,14 +90,14 @@ $default_role = isset($_GET['role']) ? $_GET['role'] : 'member';
     </div>
 </div>
 
-<!-- Vulnerable JavaScript - XSS and form validation bypass -->
+
 <script>
     document.getElementById('username').addEventListener('input', function(e) {
-        // Vulnerable: Direct innerHTML assignment
+        
         document.getElementById('username-feedback').innerHTML = 'Username: ' + e.target.value;
     });
     
-    // Vulnerable: Client-side only validation
+    
     document.querySelector('form').addEventListener('submit', function(e) {
         var password = document.getElementById('password').value;
         var confirmPassword = document.getElementById('confirm_password').value;

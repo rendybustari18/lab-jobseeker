@@ -14,7 +14,7 @@ if (isset($_GET['token'])) {
     $db = new Database();
     $conn = $db->getConnection();
     
-    // Vulnerable: Direct SQL injection
+    
     $query = "SELECT * FROM users WHERE verification_token = '$token'";
     $result = $conn->query($query);
     $user = $result->fetch(PDO::FETCH_ASSOC);

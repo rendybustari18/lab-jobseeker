@@ -4,7 +4,6 @@ require_once __DIR__ . '/../config/env.php';
 class JWT {
     private static $secret = JWT_SECRET;
     
-    // Vulnerable JWT implementation
     public static function encode($payload) {
         $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
         $payload = json_encode($payload);
@@ -28,7 +27,7 @@ class JWT {
         
         $payload = json_decode(base64_decode($parts[1]), true);
         
-        // Skip signature verification - major vulnerability
+        
         return $payload;
     }
     

@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $job_type = $_POST['job_type'];
         $job_id = $_POST['job_id'] ?? null;
 
-    // Use addslashes to prevent SQL crash but still vulnerable to XSS
+    
     $title_escaped = addslashes($title);
     $description_escaped = addslashes($description);
     $requirements_escaped = addslashes($requirements);
@@ -55,7 +55,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $job_owner = $check_result->fetch(PDO::FETCH_ASSOC);
 
         if ($job_owner && $job_owner['company_id'] == $user_id) {
-            // Update job - Vulnerable: SQL injection but with ownership check
             $query = "UPDATE jobs SET title = '$title_escaped', description = '$description_escaped',
                      requirements = '$requirements_escaped', salary_min = $salary_min, salary_max = $salary_max,
                      location = '$location_escaped', job_type = '$job_type_escaped' WHERE id = '$job_id_escaped' AND company_id = $user_id";
@@ -64,7 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "Unauthorized: You can only edit your own jobs.";
         }
     } else {
-        // Create job - Vulnerable: SQL injection
         $query = "INSERT INTO jobs (company_id, title, description, requirements, salary_min, salary_max, location, job_type)
                  VALUES ($user_id, '$title_escaped', '$description_escaped', '$requirements_escaped', $salary_min, $salary_max, '$location_escaped', '$job_type_escaped')";
         $action = 'created';
@@ -80,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Handle job deletion
 if (isset($_GET['delete'])) {
-    $job_id = addslashes($_GET['delete']); // Prevent SQL crash but still vulnerable
+    $job_id = addslashes($_GET['delete']); 
 
     // Check ownership before delete
     $check_query = "SELECT company_id FROM jobs WHERE id = '$job_id'";
@@ -88,7 +86,7 @@ if (isset($_GET['delete'])) {
     $job_owner = $check_result->fetch(PDO::FETCH_ASSOC);
 
     if ($job_owner && $job_owner['company_id'] == $user_id) {
-        // Delete job with ownership check - still vulnerable to SQL injection
+        
         $query = "DELETE FROM jobs WHERE id = '$job_id' AND company_id = $user_id";
         $conn->query($query);
         $message = "Job deleted successfully!";
@@ -107,7 +105,7 @@ $jobs = $conn->query($query);
 // Get job for editing with ownership check
 $edit_job = null;
 if (isset($_GET['edit'])) {
-    $edit_id = addslashes($_GET['edit']); // Prevent SQL crash but still vulnerable
+    $edit_id = addslashes($_GET['edit']); 
     $query = "SELECT * FROM jobs WHERE id = '$edit_id' AND company_id = $user_id";
     $result = $conn->query($query);
     $edit_job = $result->fetch(PDO::FETCH_ASSOC);

@@ -10,10 +10,10 @@ require_once '../config/database.php';
 $db = new Database();
 $conn = $db->getConnection();
 
-// Use addslashes to prevent SQL crash but still vulnerable to XSS
+
 $search_query_escaped = addslashes($search_query);
 
-// Vulnerable: SQL injection (still possible with addslashes bypass)
+
 $query = "SELECT j.*, c.company_name FROM jobs j
          JOIN company_profiles c ON j.company_id = c.user_id
          WHERE j.status = 'active' AND (j.title LIKE '%$search_query_escaped%' OR j.description LIKE '%$search_query_escaped%')
@@ -25,7 +25,7 @@ $jobs = $conn->query($query);
 <div class="container mt-4">
     <h2>Search Results</h2>
     
-    <!-- Vulnerable: XSS in search display -->
+    
     <p class="text-muted">Showing results for: <strong><?php echo $search_query; ?></strong></p>
     
     <div class="row">

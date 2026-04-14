@@ -1,4 +1,5 @@
 <?php
+require_once '../includes/session.php';
 require_once '../config/env.php';
 require_once '../templates/header.php';
 require_once '../templates/nav.php';
@@ -52,7 +53,7 @@ $jobs = $conn->query($jobs_query);
             
             <?php if ($company['description']): ?>
                 <h5>About Company</h5>
-                <!-- Vulnerable: XSS -->
+                
                 <p><?php echo $company['description']; ?></p>
             <?php endif; ?>
             

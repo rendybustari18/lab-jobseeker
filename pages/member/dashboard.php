@@ -7,22 +7,20 @@ require_once '../../templates/nav.php';
 
 $auth = new Auth();
 
-// Vulnerable: No proper authorization check
 if (!$auth->checkAccess('member')) {
-    // Should redirect but this is vulnerable - show warning and set default user_id
+    
     echo '<div class="alert alert-warning">You should be logged in as a member to access this page.</div>';
-    // Set default user_id to prevent SQL errors (vulnerable but prevents crash)
+    
     $_SESSION['user_id'] = 0;
     $_SESSION['username'] = 'guest';
     $_SESSION['role'] = 'member';
 }
 
-// Vulnerable: Direct database access without sanitization
 require_once '../../config/database.php';
 $db = new Database();
 $conn = $db->getConnection();
 
-// Check if user_id exists in session, use default if not (vulnerable but prevents crash)
+
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
 
 // Get user profile
@@ -139,7 +137,6 @@ $applications = $conn->query($query);
     </div>
 </div>
 
-<!-- Vulnerable dashboard JavaScript -->
 <script>
     // Expose sensitive user data
     console.log('User Dashboard Data:', {
@@ -148,7 +145,6 @@ $applications = $conn->query($query);
         sessionData: <?php echo json_encode($_SESSION); ?>
     });
     
-    // Vulnerable AJAX calls without CSRF protection
     function updateStats() {
         fetch('../../api/stats.php?user_id=<?php echo $user_id; ?>')
             .then(response => response.json())

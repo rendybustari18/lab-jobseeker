@@ -19,7 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $application_id = $_POST['application_id'];
     $status = $_POST['status'];
     
-    // Vulnerable: SQL injection and no authorization check
     $query = "UPDATE job_applications SET status = '$status' WHERE id = $application_id";
     $conn->query($query);
     

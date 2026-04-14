@@ -3,39 +3,41 @@ require_once '../../includes/session.php';
 require_once '../../config/env.php';
 require_once '../../includes/auth.php';
 require_once '../../includes/file_upload.php';
-require_once '../../templates/header.php';
-require_once '../../templates/nav.php';
+
 
 $auth = new Auth();
 $auth->checkAccess('member');
 
 $message = '';
+if (isset($_GET['msg']) && $_GET['msg'] === 'success') {
+    $message = 'CV uploaded successfully!';
+}
 $error = '';
 
+$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
+require_once '../../config/database.php';
+$db = new Database();
+$conn = $db->getConnection();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
-    
     // Check if user is actually logged in (prevent foreign key constraint violation)
     if ($user_id <= 0) {
         $error = 'You must be logged in to perform this action.';
     } else {
     
-    // Vulnerable file upload
     if (isset($_FILES['cv_file']) && $_FILES['cv_file']['error'] === 0) {
         $cv_file = FileUpload::uploadFile($_FILES['cv_file'], 'cvs');
         
         if ($cv_file) {
-            require_once '../../config/database.php';
-            $db = new Database();
-            $conn = $db->getConnection();
-            
-            // Vulnerable: SQL injection
-            $query = "UPDATE member_profiles SET cv_file = '$cv_file' WHERE user_id = $user_id";
+            $query = "INSERT INTO member_profiles (user_id, cv_file) 
+                     VALUES ($user_id, '$cv_file') 
+                     ON DUPLICATE KEY UPDATE cv_file = '$cv_file'";
             
             if ($conn->query($query)) {
-                $message = 'CV uploaded successfully!';
+                header('Location: cv.php?msg=success');
+                exit;
             } else {
-                $error = 'Failed to update CV.';
+                $error = 'Failed to save CV to database: ' . implode(" ", $conn->errorInfo());
             }
         } else {
             $error = 'Failed to upload CV file.';
@@ -44,15 +46,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     }}
 
-// Get current CV
-require_once '../../config/database.php';
-$db = new Database();
-$conn = $db->getConnection();
-$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
+// Process deletion BEFORE display
+if (isset($_GET['delete'])) {
+    $file_to_delete = $_GET['delete'];
+    FileUpload::deleteFile($file_to_delete);
+    
+    // Update database to remove reference
+    $delete_query = "UPDATE member_profiles SET cv_file = NULL WHERE user_id = $user_id";
+    $conn->query($delete_query);
+    
+    header('Location: cv.php');
+    exit;
+}
 
-$query = "SELECT cv_file FROM member_profiles WHERE user_id = $user_id";
+// Get current CV - Sort by ID DESC to get the latest entry if multiple exist
+$query = "SELECT cv_file FROM member_profiles WHERE user_id = $user_id ORDER BY id DESC LIMIT 1";
 $result = $conn->query($query);
 $profile = $result->fetch(PDO::FETCH_ASSOC);
+
+// Include templates ONLY after all logic and redirection
+require_once '../../templates/header.php';
+require_once '../../templates/nav.php';
 ?>
 
 <div class="container-fluid">
@@ -102,8 +116,8 @@ $profile = $result->fetch(PDO::FETCH_ASSOC);
                         <form method="POST" enctype="multipart/form-data">
                             <div class="mb-3">
                                 <label for="cv_file" class="form-label">Upload CV</label>
-                                <input type="file" class="form-control" id="cv_file" name="cv_file" accept=".pdf,.doc,.docx">
-                                <div class="form-text">Supported formats: PDF, DOC, DOCX</div>
+                                <input type="file" class="form-control" id="cv_file" name="cv_file">
+                                <div class="form-text">All file formats supported for testing.</div>
                             </div>
                             
                             <?php if (isset($profile['cv_file']) && $profile['cv_file']): ?>
@@ -111,10 +125,9 @@ $profile = $result->fetch(PDO::FETCH_ASSOC);
                                     <label class="form-label">Current CV</label>
                                     <div class="border p-3 rounded">
                                         <i class="fas fa-file-pdf text-danger"></i>
-                                        <a href="<?php echo $profile['cv_file']; ?>" target="_blank" class="ms-2">
-                                            View Current CV
+                                        <a href="<?php echo BASE_URL . '/' . htmlspecialchars($profile['cv_file']); ?>" target="_blank" class="ms-2 btn btn-outline-info">
+                                            <i class="fas fa-external-link-alt"></i> View Public CV Link
                                         </a>
-                                        <!-- Vulnerable: Direct file deletion -->
                                         <a href="?delete=<?php echo $profile['cv_file']; ?>" class="btn btn-sm btn-danger ms-2" 
                                            onclick="return confirm('Delete CV?')">Delete</a>
                                     </div>
@@ -130,14 +143,6 @@ $profile = $result->fetch(PDO::FETCH_ASSOC);
     </div>
 </div>
 
-<?php
-// Vulnerable: File deletion without proper authorization
-if (isset($_GET['delete'])) {
-    $file_to_delete = $_GET['delete'];
-    FileUpload::deleteFile($file_to_delete);
-    header('Location: cv.php');
-    exit;
-}
-?>
+
 
 <?php require_once '../../templates/footer.php'; ?>

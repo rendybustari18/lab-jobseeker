@@ -52,13 +52,11 @@ require_once 'templates/nav.php';
         </div>
     </div>
     
-    <!-- Vulnerable search with XSS -->
     <div class="row mt-5">
         <div class="col-md-12">
             <h3>Recent Jobs</h3>
             <div id="recent-jobs">
                 <?php
-                // Vulnerable database query
                 require_once 'config/database.php';
                 $db = new Database();
                 $conn = $db->getConnection();

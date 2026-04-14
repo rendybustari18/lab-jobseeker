@@ -10,7 +10,7 @@ require_once '../config/database.php';
 $db = new Database();
 $conn = $db->getConnection();
 
-// Vulnerable: SQL injection
+
 $query = "SELECT j.*, c.company_name, c.description as company_description, c.website 
          FROM jobs j 
          JOIN company_profiles c ON j.company_id = c.user_id 
@@ -66,15 +66,15 @@ if (isset($_SESSION['user_id']) && $_SESSION['role'] === 'member') {
                     </div>
                     
                     <h4>Job Description</h4>
-                    <!-- Vulnerable: XSS -->
+                    
                     <div class="mb-4"><?php echo $job['description']; ?></div>
                     
                     <h4>Requirements</h4>
-                    <!-- Vulnerable: XSS -->
+                    
                     <div class="mb-4"><?php echo $job['requirements']; ?></div>
                     
                     <h4>About Company</h4>
-                    <!-- Vulnerable: XSS -->
+                    
                     <p><?php echo $job['company_description']; ?></p>
                     
                     <?php if ($job['website']): ?>

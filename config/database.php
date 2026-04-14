@@ -19,7 +19,6 @@ class Database
         $this->password = DB_PASS;
     }
 
-    // Vulnerable database connection - no prepared statements
     public function getConnection()
     {
         $this->conn = null;
@@ -31,7 +30,6 @@ class Database
             );
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $exception) {
-            // Expose sensitive error information
             echo "Connection error: " . $exception->getMessage();
             echo "<br>Host: " . $this->host;
             echo "<br>Database: " . $this->db_name;
@@ -40,15 +38,13 @@ class Database
         return $this->conn;
     }
 
-    // Direct query execution without sanitization
     public function executeQuery($query)
     {
         $result = $this->conn->query($query);
         return $result;
     }
 
-    // Vulnerable query method
-    public function vulnerableQuery($query)
+    public function query($query)
     {
         return mysqli_query($this->getConnection(), $query);
     }

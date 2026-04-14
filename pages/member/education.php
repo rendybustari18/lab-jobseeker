@@ -28,14 +28,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $db = new Database();
     $conn = $db->getConnection();
 
-    // Use addslashes to prevent SQL crash but still vulnerable to XSS
+    
     $institution_escaped = addslashes($institution);
     $degree_escaped = addslashes($degree);
     $field_of_study_escaped = addslashes($field_of_study);
     $start_date_escaped = addslashes($start_date);
     $end_date_escaped = addslashes($end_date);
 
-    // Vulnerable: SQL injection (still possible with addslashes bypass)
     $query = "INSERT INTO education (user_id, institution, degree, field_of_study, start_date, end_date)
              VALUES ($user_id, '$institution_escaped', '$degree_escaped', '$field_of_study_escaped', '$start_date_escaped', '$end_date_escaped')";
 
@@ -162,7 +161,6 @@ $education = $conn->query($query);
                                                 <?php echo $edu['end_date'] ? date('M Y', strtotime($edu['end_date'])) : 'Present'; ?>
                                             </small>
                                         </div>
-                                        <!-- Vulnerable: Direct object reference -->
                                         <a href="?delete_education=<?php echo $edu['id']; ?>" class="btn btn-sm btn-danger" 
                                            onclick="return confirm('Delete education?')">Delete</a>
                                     </div>
@@ -179,14 +177,12 @@ $education = $conn->query($query);
 </div>
 
 <?php
-// Vulnerable: Delete education without proper authorization
 if (isset($_GET['delete_education'])) {
-    $education_id = addslashes($_GET['delete_education']); // Prevent SQL crash but still vulnerable
+    $education_id = addslashes($_GET['delete_education']); 
     require_once '../../config/database.php';
     $db = new Database();
     $conn = $db->getConnection();
 
-    // Vulnerable: No ownership check, still possible SQL injection
     $query = "DELETE FROM education WHERE id = '$education_id'";
     $conn->query($query);
 

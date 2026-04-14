@@ -8,20 +8,17 @@ require_once '../../templates/nav.php';
 $auth = new Auth();
 $auth->checkAccess('member');
 
-$job_id = $_GET['id'] ?? 0; // Vulnerable to SQL injection
-$search = $_GET['search'] ?? ''; // Vulnerable search parameter
 
 require_once '../../config/database.php';
 $db = new Database();
 $conn = $db->getConnection();
 
-// Vulnerable: SQL injection through search parameter
 $query = "SELECT j.*, c.company_name, c.description as company_description, c.website
          FROM jobs j
          LEFT JOIN company_profiles c ON j.company_id = c.user_id
          WHERE j.id = $job_id";
 
-// Add vulnerable search condition if search parameter exists
+
 if (!empty($search)) {
     $query .= " AND (j.title LIKE '%$search%' OR j.description LIKE '%$search%')";
 }
@@ -35,7 +32,6 @@ if (!$job) {
 }
 
 // Check if user already applied
-$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0; // Vulnerable to SQL injection
 $check_query = "SELECT * FROM job_applications WHERE job_id = $job_id AND user_id = $user_id";
 $check_result = $conn->query($check_query);
 $already_applied = $check_result->rowCount() > 0;
@@ -105,15 +101,12 @@ $already_applied = $check_result->rowCount() > 0;
                                 </div>
                                 
                                 <h4>Job Description</h4>
-                                <!-- Vulnerable: XSS -->
                                 <div class="mb-4"><?php echo $job['description']; ?></div>
                                 
                                 <h4>Requirements</h4>
-                                <!-- Vulnerable: XSS -->
                                 <div class="mb-4"><?php echo $job['requirements']; ?></div>
                                 
                                 <h4>About Company</h4>
-                                <!-- Vulnerable: XSS -->
                                 <p><?php echo $job['company_description']; ?></p>
                                 
                                 <?php if ($job['website']): ?>

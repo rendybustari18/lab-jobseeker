@@ -3,18 +3,24 @@ require_once '../../includes/session.php';
 require_once '../../config/env.php';
 require_once '../../includes/auth.php';
 require_once '../../includes/file_upload.php';
-require_once '../../templates/header.php';
-require_once '../../templates/nav.php';
+
 
 $auth = new Auth();
 $auth->checkAccess('member');
 
 $message = '';
+if (isset($_GET['msg']) && $_GET['msg'] === 'success') {
+    $message = 'Profile updated successfully!';
+}
 $error = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
+$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
+require_once '../../config/database.php';
+$db = new Database();
+$conn = $db->getConnection();
 
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Check if user is actually logged in (prevent foreign key constraint violation)
     if ($user_id <= 0) {
         $error = 'You must be logged in to update your profile.';
@@ -23,23 +29,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $phone = $_POST['phone'];
         $address = $_POST['address'];
 
-        // Use addslashes to prevent SQL crash but still vulnerable to XSS when displayed
+        
         $full_name_escaped = addslashes($full_name);
         $phone_escaped = addslashes($phone);
         $address_escaped = addslashes($address);
 
-        // Vulnerable file upload
         $profile_photo = '';
         if (isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] === 0) {
             $profile_photo = FileUpload::uploadFile($_FILES['profile_photo'], 'profiles');
         }
         $profile_photo_escaped = addslashes($profile_photo);
 
-        require_once '../../config/database.php';
-        $db = new Database();
-        $conn = $db->getConnection();
 
-        // Vulnerable: SQL injection (still possible with addslashes bypass) but prevents crashes
+
         $query = "INSERT INTO member_profiles (user_id, full_name, phone, address, profile_photo)
                  VALUES ('$user_id', '$full_name_escaped', '$phone_escaped', '$address_escaped', '$profile_photo_escaped')
                  ON DUPLICATE KEY UPDATE
@@ -50,7 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($conn->query($query)) {
-            $message = 'Profile updated successfully!';
+            header('Location: profile.php?msg=success');
+            exit;
         } else {
             $error = 'Failed to update profile.';
         }
@@ -58,14 +61,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Get current profile
-require_once '../../config/database.php';
-$db = new Database();
-$conn = $db->getConnection();
-$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
-
 $query = "SELECT * FROM member_profiles WHERE user_id = $user_id ORDER BY id DESC";
 $result = $conn->query($query);
 $profile = $result->fetch(PDO::FETCH_ASSOC);
+
+// Include templates ONLY after all logic and redirection
+require_once '../../templates/header.php';
+require_once '../../templates/nav.php';
 ?>
 
 <div class="container-fluid">
@@ -137,7 +139,7 @@ $profile = $result->fetch(PDO::FETCH_ASSOC);
                                     <div class="mb-3">
                                         <div class="current-photo">
                                             <p class="text-muted mb-2">Current Photo:</p>
-                                            <img src="<?php echo $profile['profile_photo']; ?>"
+                                            <img src="<?php echo BASE_URL . '/' . htmlspecialchars($profile['profile_photo']); ?>"
                                                  alt="Current Profile Photo"
                                                  class="img-thumbnail"
                                                  style="max-width: 200px; max-height: 200px; object-fit: cover;">
@@ -161,14 +163,11 @@ $profile = $result->fetch(PDO::FETCH_ASSOC);
     </div>
 </div>
 
-<!-- Vulnerable profile JavaScript -->
 <script>
-    // Vulnerable: Direct DOM manipulation with user input
     document.getElementById('full_name').addEventListener('input', function(e) {
         document.getElementById('name-preview').innerHTML = 'Hello, ' + e.target.value;
     });
     
-    // Vulnerable: File upload preview without validation
     document.getElementById('profile_photo').addEventListener('change', function(e) {
         var file = e.target.files[0];
         if (file) {

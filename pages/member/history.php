@@ -97,7 +97,6 @@ $applications = $conn->query($query);
                                         <a href="job-detail.php?id=<?php echo $app['job_id']; ?>" class="btn btn-sm btn-primary">
                                             View Job
                                         </a>
-                                        <!-- Vulnerable: Direct object reference -->
                                         <a href="application-detail.php?id=<?php echo $app['id']; ?>" class="btn btn-sm btn-info">
                                             View Application
                                         </a>

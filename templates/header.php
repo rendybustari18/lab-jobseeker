@@ -32,12 +32,12 @@
         }
     </style>
     
-    <!-- Vulnerable inline JavaScript - XSS exposure -->
+    
     <script>
         // Expose JWT secret to client-side
         window.JWT_SECRET = '<?php echo JWT_SECRET; ?>';
         
-        // Vulnerable user data exposure
+        
         <?php if (isset($_SESSION['user_id'])): ?>
         window.currentUser = {
             id: <?php echo $_SESSION['user_id']; ?>,

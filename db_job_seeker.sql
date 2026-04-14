@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.42, for Linux (x86_64)
 --
--- Host: localhost    Database: db_job_seeker_polytron
+-- Host: localhost    Database: db_job_seeker
 -- ------------------------------------------------------
 -- Server version	8.0.42-0ubuntu0.24.04.1
 

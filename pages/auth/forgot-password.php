@@ -1,4 +1,5 @@
 <?php
+require_once '../../includes/session.php';
 require_once '../../config/env.php';
 require_once '../../templates/header.php';
 require_once '../../templates/nav.php';
@@ -13,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $db = new Database();
     $conn = $db->getConnection();
     
-    // Vulnerable: SQL injection
+    
     $query = "SELECT * FROM users WHERE email = '$email'";
     $result = $conn->query($query);
     $user = $result->fetch(PDO::FETCH_ASSOC);
@@ -25,13 +26,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $update_query = "UPDATE users SET verification_token = '$reset_token' WHERE email = '$email'";
         $conn->query($update_query);
         
-        // Send reset email (vulnerable)
+        
         $subject = "Password Reset Request";
         $message_body = "Click this link to reset your password: " . BASE_URL . "/pages/auth/reset-password.php?token=$reset_token";
         
-        // Vulnerable: Headers injection
+        
         $headers = "From: noreply@jobportal.com\r\n";
-        $headers .= $_POST['custom_header'] ?? ''; // Header injection vulnerability
+        $headers .= $_POST['custom_header'] ?? '';
         
         mail($email, $subject, $message_body, $headers);
         
@@ -63,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="email" class="form-control" id="email" name="email" required>
                         </div>
                         
-                        <!-- Vulnerable: Hidden field for header injection -->
+                        
                         <input type="hidden" name="custom_header" value="">
                         
                         <button type="submit" class="btn btn-primary w-100">Send Reset Link</button>
