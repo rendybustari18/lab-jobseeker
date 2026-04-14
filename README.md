@@ -41,3 +41,4 @@ Access the application at `http://localhost:8004` (or the configured port).
 - Bootstrap 5
 - FontAwesome 6# lab-jobseeker
 # lab-jobseeker
+# lab-jobseeker
